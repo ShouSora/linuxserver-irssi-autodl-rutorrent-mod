@@ -1,0 +1,94 @@
+#!/usr/bin/with-contenv bash
+
+#/autodl-irssi-plugins & /autodl-irssi are present
+
+# check/ create used folders
+mkdir -p /config{/irssi,/irssi-autodl} \
+	~/.irssi/scripts/autorun \
+	~/.autodl
+	
+	
+echo "**** check/install irssi runtime packages ****" && \
+apk add --no-cache \
+irssi \
+irssi-perl \
+php7-sockets \
+perl-archive-zip \
+perl-net-ssleay \
+perl-digest-sha1
+
+#check perl modules
+echo "**** check perl modules ****" && \
+perlmodules=`perldoc perllocal | sed -n -e 's/^.*Module[".: ]*\(.*\)$/\1/p'`
+
+if (($(awk '/(^HTML::Tagset$|^HTML::Parser$|^XML::LibXML$|^JSON$|^JSON::XS$)/{print $0}' <<< "$perlmodules" | wc -l ) < 5)); then
+	echo "current CPAN module list: ${perlmodules}" && \
+	echo "**** installing build dependencies for autodl-irssi perl modules ****"
+	export PERL_MM_USE_DEFAULT=1 && \ 
+	apk add --no-cache --virtual=build-dependencies \
+	autoconf \
+	automake \
+	perl-dev \
+	file \
+	g++ \
+	gcc \
+	libtool \
+	make \
+	ncurses-dev \
+	build-base \
+	libtool \
+	subversion \
+	linux-headers \
+	curl-dev \
+	libressl-dev \
+	ca-certificates \
+	wget \
+	perl-app-cpanminus && \
+	echo "**** installing cpm for fast perl package installation ****" && \
+	cpanm -nq App::cpm && \
+	echo "**** installing perl modules with cpm ****" && \
+	cpm install -g HTML::Entities XML::LibXML JSON JSON::XS && \ 
+	echo "**** cleanup build dependencies ****" && \
+	apk del build-dependencies
+fi
+
+
+echo "**** placing autodl-irssi ****" && \
+cp -R /autodl-irssi/* ~/.irssi/scripts/ && \
+cp /autodl-irssi/autodl-irssi.pl ~/.irssi/scripts/autorun/
+
+echo "**** placing autodl-irssi rutorrent plugin ****" && \
+cp -R /autodl-irssi-plugin/. /app/rutorrent/plugins/autodl-irssi
+
+[[ -e /app/rutorrent/plugins/autodl-irssi/conf.php ]] && \
+	rm /app/rutorrent/plugins/autodl-irssi/conf.php
+	
+echo "**** update configuration files ****" && \
+# copy/create irssi config
+[[ ! -e /config/irssi/config ]] && \
+	cp /defaults/irssi/config /config/irssi/config
+cp /config/irssi/config ~/.irssi/
+
+
+if ! [ -e ~/.irssi/startup ] || ! grep -q -m1 "load perl" ~/.irssi/startup; then 
+echo 'load perl;' >> ~/.irssi/startup 
+fi 
+# copy/create irssi-autodl config
+[[ ! -e /config/irssi-autodl/ ]] && \
+	touch /config/irssi-autodl.cfg
+cp -R /config/irssi-autodl/* ~/.autodl/
+
+# replace conf.php or use default file
+[[ ! -e /config/irssi-autodl/conf.php ]] && \
+	cp /defaults/irssi-autodl/conf.php /config/irssi-autodl/conf.php
+cp /config/irssi-autodl/conf.php /app/rutorrent/plugins/autodl-irssi/conf.php
+
+#instruct s6 to restart php-fpm
+#s6-svc -r /var/run/s6/services/php-fpm
+
+# permissions
+echo "**** set permissions ****" && \
+chown -R abc:abc \
+	/config{/irssi,/irssi-autodl} \
+	~/.irssi \
+	~/.autodl

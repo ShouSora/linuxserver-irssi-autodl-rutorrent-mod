@@ -1,0 +1,20 @@
+#!/usr/bin/with-contenv bash
+  
+echo "**** updating php config with irssi/autodl-irssi extensions ****"
+
+# create folder for persistent php overwrite config
+  mkdir -p \
+  /config/php/
+  
+# create local php.ini if it doesn't exist, set local timezone
+[[ ! -f /config/php/php-local.ini ]] && \
+	printf "; Edit this file to override php.ini directives and restart the container\\n\\ndate.timezone = %s\\n" "$TZ" > /config/php/php-local.ini
+
+# add extensions if not enabled
+for f in /config/php/php-local.ini; do \
+	[[ ! -e "${f}" ]] && touch "${f}" && \
+	if [[ "${?}" -eq 0 ]]; then continue; fi
+	if ! grep -q -m1 "^extension=sockets.so" "${f}"; then echo "extension=sockets.so" >> "${f}"; fi
+	if ! grep -q -m1 "^extension=json.so" "${f}"; then echo "extension=json.so" >> "${f}"; fi
+	if ! grep -q -m1 "^extension=xml.so" "${f}"; then echo "extension=xml.so" >> "${f}"; fi
+done
