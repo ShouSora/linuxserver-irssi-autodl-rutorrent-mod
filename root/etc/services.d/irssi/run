@@ -1,3 +1,14 @@
 #!/usr/bin/with-contenv bash
 
+start_not_satisfied=1;
+
+while (( start_not_satisfied )); do
+    if [ -f /config/irssi-autodl/.configured ]; then
+        start_not_satisfied=0;
+		break
+	fi
+	
+	sleep 5
+done
+
 irssi

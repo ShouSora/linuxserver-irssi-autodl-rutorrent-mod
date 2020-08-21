@@ -78,16 +78,19 @@ fi
 if [[ ! -e /config/irssi-autodl/autodl.cfg ]] && [[ ! -e /config/irssi-autodl/conf.php ]]; then
 	unset guipasswd
 	guipasswd=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16`
-	echo "#only touch this if you know what you're doing!
-	#port and password need to match the rutorrent-plugin configuration in conf.php
-	#the default password is randomly generated at first container initialization
-	[options]
-	
-	gui-server-port = 17023
-	gui-server-password = $guipasswd" >> /config/irssi-autodl/autodl.cfg && \
+echo "#only touch this if you know what you're doing!
+#port and password need to match the rutorrent-plugin configuration in conf.php
+#the default password is randomly generated at first container initialization
+[options]
+
+gui-server-port = 17023
+gui-server-password = $guipasswd" >> /config/irssi-autodl/autodl.cfg && \
 	cp /defaults/irssi-autodl/conf.php /config/irssi-autodl/conf.php && \
 	sed -i '/^$autodlPort/c\$autodlPort = 17023' /config/irssi-autodl/conf.php && \
-	sed -i '/^$autodlPassword/c\$autodlPassword = '"${guipasswd}" /config/irssi-autodl/conf.php
+	sed -i '/^$autodlPassword/c\$autodlPassword = '"${guipasswd}" /config/irssi-autodl/conf.php && \
+	need_configure = 1
+else
+	need_configure = 0
 fi
 
 # replace configuration files
@@ -103,3 +106,22 @@ chown -R abc:abc \
 	/config{/irssi,/irssi-autodl} \
 	~/.irssi \
 	~/.autodl
+	
+
+if (( need_configure )); then
+	echo "**** Please configure the following files: ****
+<config-volume>/irssi/conf -> Add your tracker in here (server, chatnet and port). Might also add resolve_prefer_ipv6 for preference.
+<config-volume>/irssi-autodl/autodl.cfg -> 
+* Add a [tracker CHATNET] - section for your tracker. Add passkey/ force-ssl setting
+* Add a [server ADDRESS] - section with identification/ nickname configuration
+* Add a [channel SERVER-ADRESS] - section for auto-joining announce-channels
+* Add [filter FILTERNAME] - sections for your autofetch filters
+* Add other keys to the [options] section if necessary
+
+******** IMPORTANT: gui-server-port AND gui-server-password are pre-filled with fixed port & random password. 
+They must always match the settings in /config/irssi-autodl/conf.php when changed (otherwise rutorrent-plugin won't work) *******
+
+After finishing configuration, please create the file /config/irssi-autodl/.configured to autostart irssi with this container
+You can simply execute touch /config/irssi-autodl/.configured inside the container or
+touch <config-volume>/irssi-autodl/.configured from the host-system"
+fi
