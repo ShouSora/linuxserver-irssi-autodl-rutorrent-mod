@@ -73,14 +73,25 @@ cp /config/irssi/config ~/.irssi/
 if ! [ -e ~/.irssi/startup ] || ! grep -q -m1 "load perl" ~/.irssi/startup; then 
 echo 'load perl;' >> ~/.irssi/startup 
 fi 
-# copy/create irssi-autodl config
-[[ ! -e /config/irssi-autodl/ ]] && \
-	touch /config/irssi-autodl/autodl.cfg
-cp /config/irssi-autodl/autodl.cfg ~/.autodl/autodl.cfg
 
-# replace conf.php or use default file
-[[ ! -e /config/irssi-autodl/conf.php ]] && \
-	cp /defaults/irssi-autodl/conf.php /config/irssi-autodl/conf.php
+# check initial config of autodl.cfg & conf.php for gui server/port configuration
+if [[ ! -e /config/irssi-autodl/autodl.cfg ]] && [[ ! -e /config/irssi-autodl/conf.php ]]; then
+	unset guipasswd
+	guipasswd=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16`
+	echo "#only touch this if you know what you're doing!
+	#port and password need to match the rutorrent-plugin configuration in conf.php
+	#the default password is randomly generated at first container initialization
+	[options]
+	
+	gui-server-port = 17023
+	gui-server-password = $guipasswd" >> /config/irssi-autodl/autodl.cfg && \
+	cp /defaults/irssi-autodl/conf.php /config/irssi-autodl/conf.php && \
+	sed -i '/^$autodlPort/c\$autodlPort = 17023' /config/irssi-autodl/conf.php && \
+	sed -i '/^$autodlPassword/c\$autodlPassword = '"${guipasswd}" /config/irssi-autodl/conf.php
+fi
+
+# replace configuration files
+cp /config/irssi-autodl/autodl.cfg ~/.autodl/autodl.cfg
 cp /config/irssi-autodl/conf.php /app/rutorrent/plugins/autodl-irssi/conf.php
 
 #instruct s6 to restart php-fpm
