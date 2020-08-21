@@ -75,8 +75,8 @@ echo 'load perl;' >> ~/.irssi/startup
 fi 
 # copy/create irssi-autodl config
 [[ ! -e /config/irssi-autodl/ ]] && \
-	touch /config/irssi-autodl.cfg
-cp -R /config/irssi-autodl/* ~/.autodl/
+	touch /config/irssi-autodl/autodl.cfg
+cp /config/irssi-autodl/autodl.cfg ~/.autodl/autodl.cfg
 
 # replace conf.php or use default file
 [[ ! -e /config/irssi-autodl/conf.php ]] && \
