@@ -7,14 +7,13 @@ RUN \
 	curl \
 	wget \
 	git && \
- mkdir -p /root-layer/autodl-irssi && \
- cd /root-layer
+ mkdir -p /root-layer/autodl-irssi
 	
 RUN \
  echo "**** download autodl-irssi rutorrent plugin ****" && \
- git clone https://github.com/autodl-community/autodl-rutorrent.git autodl-irssi-plugin --quiet && \
- if [ -f /root-layer/autodl-irssi/conf.php ]; then \
-	rm /root-layer/autodl-irssi/conf.php; fi
+ git clone https://github.com/autodl-community/autodl-rutorrent.git /root-layer/autodl-irssi-plugin --quiet && \
+ if [ -f /root-layer/autodl-irssi-plugin/conf.php ]; then \
+	rm /root-layer/autodl-irssi-plugin/conf.php; fi
 	
 RUN \
   echo "**** download autodl-irssi ****" && \
@@ -26,6 +25,8 @@ RUN \
   rm autodl-irssi.zip
   
 
+# Copy local files from dockermod
+COPY root/ /root-layer/
 
   
 ## Single layer deployed image ##
