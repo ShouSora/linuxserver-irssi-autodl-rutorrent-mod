@@ -11,7 +11,7 @@ services:
 
 env:
   global:
-    - DOCKERHUB="tahiradocker/irssi-mod:latest"
+    - DOCKERHUB="tahiradocker/irssi-mod"
 
 jobs:
   include:
