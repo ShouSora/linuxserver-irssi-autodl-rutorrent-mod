@@ -88,9 +88,9 @@ gui-server-password = $guipasswd" >> /config/irssi-autodl/autodl.cfg && \
 	cp /defaults/irssi-autodl/conf.php /config/irssi-autodl/conf.php && \
 	sed -i '/^$autodlPort/c\$autodlPort = 17023' /config/irssi-autodl/conf.php && \
 	sed -i '/^$autodlPassword/c\$autodlPassword = '"${guipasswd}" /config/irssi-autodl/conf.php && \
-	need_configure = 1
+	need_configure=1
 else
-	need_configure = 0
+	need_configure=0
 fi
 
 # replace configuration files
@@ -118,8 +118,10 @@ if (( need_configure )); then
 * Add [filter FILTERNAME] - sections for your autofetch filters
 * Add other keys to the [options] section if necessary
 
-******** IMPORTANT: gui-server-port AND gui-server-password are pre-filled with fixed port & random password. 
-They must always match the settings in /config/irssi-autodl/conf.php when changed (otherwise rutorrent-plugin won't work) *******
+**********************************************************************************************************
+	IMPORTANT: gui-server-port AND gui-server-password are pre-filled with fixed port & random password. 
+	They must always match the settings in /config/irssi-autodl/conf.php when changed (otherwise rutorrent-plugin won't work)
+**********************************************************************************************************
 
 After finishing configuration, please create the file /config/irssi-autodl/.configured to autostart irssi with this container
 You can simply execute touch /config/irssi-autodl/.configured inside the container or
