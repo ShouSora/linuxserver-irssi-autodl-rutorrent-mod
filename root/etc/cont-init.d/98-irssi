@@ -4,8 +4,7 @@
 
 # check/ create used folders
 mkdir -p /config{/irssi,/irssi-autodl} \
-	~/.irssi/scripts/autorun \
-	~/.autodl
+		/app/irssi{/.irssi,/.autodl}
 	
 	
 echo "**** check/install irssi runtime packages ****" && \
@@ -54,8 +53,12 @@ fi
 
 
 echo "**** placing autodl-irssi ****" && \
-cp -R /autodl-irssi/* ~/.irssi/scripts/ && \
-cp /autodl-irssi/autodl-irssi.pl ~/.irssi/scripts/autorun/
+cp -R /autodl-irssi/* /app/irssi/.irssi/scripts/
+#set $_homeDir in Dirs.pm so that we can place .autodl folder in /app/irssi/.autodl
+#avoid permission issues/ use of root home-directory (s6 does not swap the enviroment for the abc user)
+[[ -e /app/irssi/.irssi/scripts/AutodlIrssi/Dirs.pm ]] && \
+	sed -i '/^my $_homeDir/c\my $_homeDir = "/app/irssi/";' /app/irssi/.irssi/scripts/AutodlIrssi/Dirs.pm
+cp /autodl-irssi/autodl-irssi.pl /app/irssi/.irssi/scripts/autorun/
 
 echo "**** placing autodl-irssi rutorrent plugin ****" && \
 cp -R /autodl-irssi-plugin/. /app/rutorrent/plugins/autodl-irssi
@@ -67,11 +70,11 @@ echo "**** update configuration files ****" && \
 # copy/create irssi config
 [[ ! -e /config/irssi/config ]] && \
 	cp /defaults/irssi/config /config/irssi/config
-cp /config/irssi/config ~/.irssi/
+cp /config/irssi/config /app/irssi/.irssi/config
 
 
-if ! [ -e ~/.irssi/startup ] || ! grep -q -m1 "load perl" ~/.irssi/startup; then 
-echo 'load perl;' >> ~/.irssi/startup 
+if ! [ -e /app/irssi/.irssi/startup ] || ! grep -q -m1 "load perl" /app/irssi/.irssi/startup; then 
+echo 'load perl;' >> /app/irssi/.irssi/startup 
 fi 
 
 # check initial config of autodl.cfg & conf.php for gui server/port configuration
@@ -94,7 +97,7 @@ else
 fi
 
 # replace configuration files
-cp /config/irssi-autodl/autodl.cfg ~/.autodl/autodl.cfg
+cp /config/irssi-autodl/autodl.cfg /app/irssi/.autodl/autodl.cfg
 cp /config/irssi-autodl/conf.php /app/rutorrent/plugins/autodl-irssi/conf.php
 
 #instruct s6 to restart php-fpm
@@ -103,13 +106,15 @@ cp /config/irssi-autodl/conf.php /app/rutorrent/plugins/autodl-irssi/conf.php
 # permissions
 echo "**** set permissions ****" && \
 chown -R abc:abc \
-	/config{/irssi,/irssi-autodl} \
-	~/.irssi \
-	~/.autodl
+	/config \
+	/run \
+	/app/irssi
 	
 
 if (( need_configure )); then
-	echo "**** Please configure the following files: ****
+	echo "*********************************************************
+ABOUT CONFIGURATION ***********************************************
+**** Please configure the following files: ****
 <config-volume>/irssi/conf -> Add your tracker in here (server, chatnet and port). Might also add resolve_prefer_ipv6 for preference.
 <config-volume>/irssi-autodl/autodl.cfg -> 
 * Add a [tracker CHATNET] - section for your tracker. Add passkey/ force-ssl setting
@@ -125,5 +130,7 @@ if (( need_configure )); then
 
 After finishing configuration, please create the file /config/irssi-autodl/.configured to autostart irssi with this container
 You can simply execute touch /config/irssi-autodl/.configured inside the container or
-touch <config-volume>/irssi-autodl/.configured from the host-system"
+touch <config-volume>/irssi-autodl/.configured from the host-system
+*********************************************************
+*********************************************************"
 fi

@@ -19,6 +19,7 @@ _term() {
 trap _term SIGTERM
 
 screen -D -m -S \
-irssi s6-setuidgid abc /usr/bin/irssi
+irssi s6-setuidgid abc /usr/bin/irssi --config=/app/irssi/.irssi/config --home=/app/irssi/.irssi/
+
 
 wait
