@@ -11,4 +11,14 @@ while (( start_not_satisfied )); do
 	sleep 5
 done
 
-irssi
+_term() {
+  echo "Caught SIGTERM signal!"
+  killall -TERM rtorrent 2>/dev/null
+}
+
+trap _term SIGTERM
+
+screen -D -m -S \
+irssi s6-setuidgid abc /usr/bin/irssi
+
+wait
