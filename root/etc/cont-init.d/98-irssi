@@ -81,13 +81,13 @@ if [[ ! -e /config/irssi-autodl/autodl.cfg ]] && [[ ! -e /config/irssi-autodl/co
 echo "#only touch this if you know what you're doing!
 #port and password need to match the rutorrent-plugin configuration in conf.php
 #the default password is randomly generated at first container initialization
-[options]
 
+[options]
 gui-server-port = 17023
 gui-server-password = $guipasswd" >> /config/irssi-autodl/autodl.cfg && \
 	cp /defaults/irssi-autodl/conf.php /config/irssi-autodl/conf.php && \
-	sed -i '/^$autodlPort/c\$autodlPort = 17023' /config/irssi-autodl/conf.php && \
-	sed -i '/^$autodlPassword/c\$autodlPassword = '"${guipasswd}" /config/irssi-autodl/conf.php && \
+	sed -i '/^$autodlPort/c\$autodlPort = 17023;' /config/irssi-autodl/conf.php && \
+	sed -i '/^$autodlPassword/c\$autodlPassword = '"${guipasswd}"';' /config/irssi-autodl/conf.php && \
 	need_configure=1
 else
 	need_configure=0
