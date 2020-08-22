@@ -87,7 +87,7 @@ gui-server-port = 17023
 gui-server-password = $guipasswd" >> /config/irssi-autodl/autodl.cfg && \
 	cp /defaults/irssi-autodl/conf.php /config/irssi-autodl/conf.php && \
 	sed -i '/^$autodlPort/c\$autodlPort = 17023;' /config/irssi-autodl/conf.php && \
-	sed -i '/^$autodlPassword/c\$autodlPassword = '"${guipasswd}"';' /config/irssi-autodl/conf.php && \
+	sed -i '/^$autodlPassword/c\$autodlPassword = "'"${guipasswd}"'";' /config/irssi-autodl/conf.php && \
 	need_configure=1
 else
 	need_configure=0
