@@ -4,9 +4,8 @@
 
 # check/ create used folders
 mkdir -p /config{/irssi,/irssi-autodl} \
-		/app/irssi{/.irssi,/.autodl}
-	
-	
+		/app/irssi{/.irssi/scripts/autorun,/.autodl}
+		
 echo "**** check/install irssi runtime packages ****" && \
 apk add --no-cache \
 irssi \
@@ -18,12 +17,12 @@ perl-digest-sha1
 
 #check perl modules
 echo "**** check perl modules ****" && \
-perlmodules=`perldoc perllocal | sed -n -e 's/^.*Module[".: ]*\(.*\)$/\1/p'`
+perlmodules=`perldoc perllocal 2> /dev/null | sed -n -e 's/^.*Module[".: ]*\(.*\)$/\1/p'`
 
 if (($(awk '/(^HTML::Tagset$|^HTML::Parser$|^XML::LibXML$|^JSON$|^JSON::XS$)/{print $0}' <<< "$perlmodules" | wc -l ) < 5)); then
 	echo "current CPAN module list: ${perlmodules}" && \
 	echo "**** installing build dependencies for autodl-irssi perl modules ****"
-	export PERL_MM_USE_DEFAULT=1 && \ 
+	export PERL_MM_USE_DEFAULT=1 && \
 	apk add --no-cache --virtual=build-dependencies \
 	autoconf \
 	automake \
@@ -46,7 +45,7 @@ if (($(awk '/(^HTML::Tagset$|^HTML::Parser$|^XML::LibXML$|^JSON$|^JSON::XS$)/{pr
 	echo "**** installing cpm for fast perl package installation ****" && \
 	cpanm -nq App::cpm && \
 	echo "**** installing perl modules with cpm ****" && \
-	cpm install -g HTML::Entities XML::LibXML JSON JSON::XS && \ 
+	cpm install -g HTML::Entities XML::LibXML JSON JSON::XS && \
 	echo "**** cleanup build dependencies ****" && \
 	apk del build-dependencies
 fi
@@ -73,9 +72,9 @@ echo "**** update configuration files ****" && \
 cp /config/irssi/config /app/irssi/.irssi/config
 
 
-if ! [ -e /app/irssi/.irssi/startup ] || ! grep -q -m1 "load perl" /app/irssi/.irssi/startup; then 
-echo 'load perl;' >> /app/irssi/.irssi/startup 
-fi 
+if ! [ -e /app/irssi/.irssi/startup ] || ! grep -q -m1 "load perl" /app/irssi/.irssi/startup; then
+echo 'load perl;' >> /app/irssi/.irssi/startup
+fi
 
 # check initial config of autodl.cfg & conf.php for gui server/port configuration
 if [[ ! -e /config/irssi-autodl/autodl.cfg ]] && [[ ! -e /config/irssi-autodl/conf.php ]]; then
