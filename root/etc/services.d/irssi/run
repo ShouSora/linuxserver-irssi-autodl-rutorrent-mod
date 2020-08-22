@@ -1,6 +1,7 @@
 #!/usr/bin/with-contenv bash
 
 start_not_satisfied=1;
+already_configured=1;
 
 while (( start_not_satisfied )); do
     if [ -f /config/irssi-autodl/.configured ]; then
@@ -8,6 +9,8 @@ while (( start_not_satisfied )); do
 		break
 	fi
 	
+	#the configuration was not applied from the start
+	already_configured=0;
 	sleep 5
 done
 
@@ -18,6 +21,13 @@ _term() {
 
 trap _term SIGTERM
 
+#re-apply 98-irssi to fix permissions & copy files
+if ((! already_configured)); then
+	./etc/cont-init.d/98-irssi && \
+	s6-svc -r /var/run/s6/services/php-fpm
+fi
+
+#finally attempt to start irssi
 screen -D -m -S \
 irssi s6-setuidgid abc /usr/bin/irssi --config=/app/irssi/.irssi/config --home=/app/irssi/.irssi/
 
