@@ -20,7 +20,7 @@ RUN \
 RUN \
   echo "**** download autodl-irssi ****" && \
   cd /root-layer/autodl-irssi && \
-  downloadurl=`curl -sL --retry-connrefused -H http://git.io/vlcND?access_token=$github_token | tr '\n' ' ' | sed 's/.*"browser_download_url"[".: ]*\([^}]*}\).*/\1/; s/\(.*zip\).*/\1/'` && \
+  downloadurl=`curl -sL --retry-connrefused http://git.io/vlcND?access_token=$github_token | tr '\n' ' ' | sed 's/.*"browser_download_url"[".: ]*\([^}]*}\).*/\1/; s/\(.*zip\).*/\1/'` && \
   echo "**** downloading from ${downloadurl}" && \
   echo $downloadurl | xargs wget -q -O autodl-irssi.zip && \
   unzip -o autodl-irssi.zip && \
