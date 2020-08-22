@@ -23,7 +23,7 @@ trap _term SIGTERM
 
 #re-apply 98-irssi to fix permissions & copy files
 if ((! already_configured)); then
-	./etc/cont-init.d/98-irssi && \
+	/var/run/s6/etc/cont-init.d/98-irssi && \
 	s6-svc -r /var/run/s6/services/php-fpm
 fi
 
