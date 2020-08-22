@@ -13,7 +13,7 @@ done
 
 _term() {
   echo "Caught SIGTERM signal!"
-  killall -TERM rtorrent 2>/dev/null
+  killall -TERM irssi 2>/dev/null
 }
 
 trap _term SIGTERM
